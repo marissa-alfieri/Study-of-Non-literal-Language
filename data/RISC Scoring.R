@@ -1,6 +1,37 @@
 #RISC Video scoring 
 
 library(dplyr)
+
+# Function to process datasets
+process_data <- function(data, answer_key) {
+  # Perform the merge with the answer key
+  data <- data %>%
+    left_join(answer_key, by = "Material.set")
+  
+  # Initialize RISC.Score
+  data$RISC.Score <- 0
+  
+  # Get the list of video columns from the answer key
+  video_columns <- colnames(answer_key)[grepl("Video", colnames(answer_key))]
+  
+  # Loop over the video columns and calculate the score
+  for (video_column in video_columns) {
+    video_column_x <- paste0(video_column, ".x")  # Data column
+    video_column_y <- paste0(video_column, ".y")  # Answer key column
+    
+    # Ensure both columns exist
+    if (video_column_x %in% colnames(data) && video_column_y %in% colnames(data)) {
+      # Compare values row-wise and add to RISC.Score
+      data$RISC.Score <- data$RISC.Score + (data[[video_column_x]] == data[[video_column_y]])
+    } else {
+      warning(paste("Columns", video_column_x, "or", video_column_y, "not found in the dataset"))
+    }
+  }
+  
+  return(data)
+}
+
+# Load your datasets
 Summer_2024 <- read.csv("data/Summer_2024.csv")
 Fall_2024 <- read.csv("data/Fall_2024.csv")
 
@@ -9,90 +40,40 @@ answer_key <- data.frame(
   "Material.set" = c(1, 2, 3, 4),  
   "Video.1" = c("Literal", "Literal", "Sarcastic", "Sarcastic"),
   "Video.2" = c("Literal", "Sarcastic", "Sarcastic", "Literal"),
-  "Video.3" = c("Sarcastic", "Sarcastic","Literal","Literal"),
+  "Video.3" = c("Sarcastic", "Sarcastic", "Literal", "Literal"),
   "Video.4" = c("Sarcastic", "Literal", "Literal", "Sarcastic"),
   "Video.5" = c("Literal", "Literal", "Sarcastic", "Sarcastic"),
   "Video.6" = c("Literal", "Sarcastic", "Sarcastic", "Literal"),
-  "Video.7" = c("Sarcastic", "Sarcastic","Literal","Literal"),
+  "Video.7" = c("Sarcastic", "Sarcastic", "Literal", "Literal"),
   "Video.8" = c("Sarcastic", "Literal", "Literal", "Sarcastic"),
   "Video.9" = c("Literal", "Literal", "Sarcastic", "Literal"),
   "Video.10" = c("Literal", "Sarcastic", "Sarcastic", "Sarcastic"),
-  "Video.11" = c("Sarcastic", "Sarcastic","Literal","Literal"), 
-  "Video.12" = c("Sarcastic","Literal","Literal", "Literal"),
+  "Video.11" = c("Sarcastic", "Sarcastic", "Literal", "Literal"),
+  "Video.12" = c("Sarcastic", "Literal", "Literal", "Literal"),
   "Video.13" = c("Literal", "Literal", "Sarcastic", "Sarcastic"),
   "Video.14" = c("Literal", "Sarcastic", "Sarcastic", "Sarcastic"),
-  "Video.15" = c("Sarcastic", "Sarcastic","Literal","Literal"),
-  "Video.16" = c("Sarcastic","Literal","Literal", "Literal"),
+  "Video.15" = c("Sarcastic", "Sarcastic", "Literal", "Literal"),
+  "Video.16" = c("Sarcastic", "Literal", "Literal", "Literal"),
   "Video.17" = c("Literal", "Literal", "Sarcastic", "Sarcastic"),
   "Video.18" = c("Literal", "Sarcastic", "Sarcastic", "Sarcastic"),
-  "Video.19" = c("Sarcastic", "Sarcastic","Literal","Literal"),
-  "Video.20" = c("Sarcastic","Literal","Literal", "Literal"),
+  "Video.19" = c("Sarcastic", "Sarcastic", "Literal", "Literal"),
+  "Video.20" = c("Sarcastic", "Literal", "Literal", "Literal"),
   "Video.21" = c("Literal", "Literal", "Sarcastic", "Sarcastic"),
   "Video.22" = c("Literal", "Sarcastic", "Sarcastic", "Sarcastic"),
-  "Video.23" = c("Sarcastic", "Sarcastic","Literal","Literal"),
-  "Video.24" = c("Sarcastic","Literal","Literal", "Literal"),
+  "Video.23" = c("Sarcastic", "Sarcastic", "Literal", "Literal"),
+  "Video.24" = c("Sarcastic", "Literal", "Literal", "Literal"),
   "Video.25" = c("Literal", "Literal", "Sarcastic", "Sarcastic"),
   "Video.26" = c("Literal", "Sarcastic", "Sarcastic", "Sarcastic"),
-  "Video.27" = c("Sarcastic", "Sarcastic","Literal","Literal"),
-  "Video.28" = c("Sarcastic","Literal","Literal", "Literal"),
+  "Video.27" = c("Sarcastic", "Sarcastic", "Literal", "Literal"),
+  "Video.28" = c("Sarcastic", "Literal", "Literal", "Literal"),
   "Video.29" = c("Literal", "Literal", "Sarcastic", "Sarcastic"),
   "Video.30" = c("Literal", "Sarcastic", "Sarcastic", "Sarcastic")
 )
 
-# Ensure that the answer_key has columns named correctly for the merge
-colnames(answer_key)[-1] <- paste0(colnames(answer_key)[-1], ".y")
+# Process each dataset
+Summer_2024 <- process_data(Summer_2024, answer_key)
+Fall_2024 <- process_data(Fall_2024, answer_key)
 
-# Perform the merge again
-Summer_2024 <- Summer_2024 %>%
-  left_join(answer_key, by = "Material.set")
-
-# Initialize the RISC.Score column before the loop
-Summer_2024$RISC.Score <- 0
-
-# Loop through each video (1 to 30) and update the RISC score based on the comparison
-for (i in 1:30) {
-  video_column <- paste0("Video.", i)
-  answer_column <- paste0("Video.", i, ".y")  # Assuming correct answer columns have '.y'
-  
-  # Check if the answer_column exists in the data
-  if (answer_column %in% colnames(Summer_2024)) {
-    
-    # Print values to check if comparison is working
-    print(paste("Comparing", video_column, "with", answer_column))
-    print(head(Summer_2024[, c(video_column, answer_column)]))  # Check the first few rows
-    
-    # Update the RISC score by comparing responses for each row
-    Summer_2024 <- Summer_2024 %>%
-      rowwise() %>%
-      mutate(
-        RISC.Score = RISC.Score + ifelse(get(video_column) == get(answer_column), 1, 0)
-      ) %>%
-      ungroup()
-  } else {
-    warning(paste("Column", answer_column, "not found in the dataset"))
-  }
-}
-
-# View the modified dataset with the new RISC.Score column
-head(Summer_2024)
-
-
-
-'''Previous Attempt 
-# Preprocess the video responses to extract "Literal" or "Sarcastic"
-# Assuming Summer_2024 has columns with responses like "Sarcastic positive", so we will extract the first part
-Summer_2024_clean <- Summer_2024 %>%
-  mutate(across(starts_with("Video"), ~ gsub(" (positive|negative)$", "", .)))
-
-# Merge the Summer_2024 data with the answer key based on Material.set
-Summer_2024_scored <- Summer_2024_clean %>%
-  left_join(answer_key, by = c("Material.set")) %>%
-  rowwise() %>%
-  mutate(
-    RISC.Score = sum(c_across(starts_with("Video")) == c_across(ends_with(".y")), na.rm = TRUE)
-  ) %>%
-  ungroup()
-
-# View the result with the new RISC.Score column
-head(Summer_2024_scored)
-'''
+# Print the results
+print(head(Summer_2024[, c("Material.set", "RISC.Score")]))
+print(head(Fall_2024[, c("Material.set", "RISC.Score")]))
