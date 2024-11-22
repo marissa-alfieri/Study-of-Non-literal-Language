@@ -5,5 +5,5 @@
 I uploaded the data set into the folder `data` and it is called `fall2024.csv`. 
 
 11/22/2024
-I created 
+
 

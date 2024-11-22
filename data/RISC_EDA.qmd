@@ -6,8 +6,58 @@ editor: visual
 
 
 ```{r}
+# Combine the datasets without adding a dataset column
+combined_data <- bind_rows(Summer_2024, Fall_2024)
+
+library(ggplot2)
+
+# Create a boxplot for combined data
+ggplot(combined_data, aes(y = RISC.Score)) +
+  geom_boxplot(fill = "lightblue") +
+  labs(title = "Spread of RISC Scores (Summer & Fall 2024 Combined)", 
+       y = "RISC Score (out of 30)") +
+  theme_minimal()
+
+# Summary statistics for combined data
+summary_stats <- summarise(combined_data,
+                           Min = min(RISC.Score),
+                           Q1 = quantile(RISC.Score, 0.25),
+                           Median = median(RISC.Score),
+                           Mean = mean(RISC.Score),
+                           Q3 = quantile(RISC.Score, 0.75),
+                           Max = max(RISC.Score))
+
+print(summary_stats)
+```
 
 
+```{r}
+library(dplyr)
+# Combining datasets
+combined_data <- bind_rows(Summer_2024, Fall_2024)
+
+ggplot(combined_data, aes(x = Can.you.speak.another.language., y = RISC.Score)) +
+  geom_boxplot(fill = "lightcoral", outlier.shape = NA) +  # Removes outliers 
+  theme_minimal() +
+  ylim(20, 30) +
+  labs(title = "RISC Score by Language Ability (Without Outliers)", x = "Can You Speak Another Language?", y = "RISC Score")
+
+#Summary stats for combined data
+summary_stats <- combined_data %>%
+  group_by(Can.you.speak.another.language.) %>%
+  summarise(
+    count = n(),
+    mean = mean(RISC.Score, na.rm = TRUE),
+    median = median(RISC.Score, na.rm = TRUE),
+    sd = sd(RISC.Score, na.rm = TRUE),
+    min = min(RISC.Score, na.rm = TRUE),
+    max = max(RISC.Score, na.rm = TRUE),
+    q1 = quantile(RISC.Score, 0.25, na.rm = TRUE),
+    q3 = quantile(RISC.Score, 0.75, na.rm = TRUE)
+  )
+
+# View the summary stats
+print(summary_stats)
 
 
 ```
