@@ -74,6 +74,7 @@ answer_key <- data.frame(
 Summer_2024 <- process_data(Summer_2024, answer_key)
 Fall_2024 <- process_data(Fall_2024, answer_key)
 
-# Print the results
-print(head(Summer_2024[, c("Material.set", "RISC.Score")]))
-print(head(Fall_2024[, c("Material.set", "RISC.Score")]))
+#Overwrite datasets 
+write.csv(Summer_2024, "data/Summer_2024.csv", row.names = FALSE)
+write.csv(Fall_2024, "data/Fall_2024.csv", row.names = FALSE)
+
