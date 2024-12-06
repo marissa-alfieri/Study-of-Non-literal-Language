@@ -61,3 +61,26 @@ print(summary_stats)
 
 
 ```
+
+
+```{r}
+# Load necessary libraries
+library(tidyverse)
+
+# Read the datasets
+fall_data <- read.csv("Fall_2024.csv")
+summer_data <- read.csv("Summer_2024.csv")
+
+# Combine the datasets
+combined_data <- bind_rows(fall_data, summer_data)
+
+# Plot the linear line graph
+ggplot(combined_data, aes(x = Current.Social.Participation, y = RISC.Score)) +
+  geom_point(color = "blue", alpha = 0.6) +  # Add points for better visualization
+  geom_smooth(method = "lm", color = "red", se = FALSE) +  # Add a linear trend line
+  labs(title = "Comparison of Current Social Participation and RISC Score",
+       x = "Current Social Participation",
+       y = "RISC Score") +
+  theme_minimal()
+
+```
